@@ -1,3 +1,4 @@
+import { NgComponentOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,6 +7,7 @@ import {
   inject,
   OnInit,
   signal,
+  Type,
   untracked,
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable, toSignal } from "@angular/core/rxjs-interop";
@@ -104,6 +106,10 @@ import { ItemDeepLink, ItemDeepLinkAction, itemDeepLinkFrom } from "../utils/ite
 
 import { BulkDeleteDialogWebAdapter } from "./bulk-action-dialogs/bulk-delete-dialog-web.adapter";
 import { VaultBannersComponent } from "./vault-banners/vault-banners.component";
+import {
+  VAULT_GATED_COLLECTION_BANNER,
+  VaultGatedCollectionBanner,
+} from "./vault-gated-collection-banner.token";
 import { VaultOnboardingComponent } from "./vault-onboarding/vault-onboarding.component";
 
 /**
@@ -139,6 +145,7 @@ import { VaultOnboardingComponent } from "./vault-onboarding/vault-onboarding.co
     VaultOrganizationUserNotificationsComponent,
     VaultRemountOnDirective,
     SharedFolderCardGridComponent,
+    NgComponentOutlet,
   ],
   providers: [
     safeProvider({ provide: DefaultCipherFormConfigService, useAngularDecorators: true }),
@@ -179,6 +186,16 @@ export class VaultNextComponent implements OnInit {
 
   protected readonly importCoachmarkOpen = computed(
     () => this.coachmarkService.activeStepId() === "importData",
+  );
+
+  /**
+   * Host-provided notice naming the request requirement on a governed shared folder. Unprovided —
+   * every build without PAM — nothing renders. The component itself decides whether the folder it
+   * is handed warrants the notice, so this page only has to say which folder is open.
+   */
+  protected readonly gatedCollectionBanner: Type<VaultGatedCollectionBanner> | null = inject(
+    VAULT_GATED_COLLECTION_BANNER,
+    { optional: true },
   );
 
   /**
